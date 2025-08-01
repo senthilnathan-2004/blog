@@ -1,0 +1,36 @@
+1. Escape User Input in React (Frontend)
+React escapes content by default when rendering variables, but be careful when using dangerouslySetInnerHTML.
+
+"  import DOMPurify from 'dompurify';
+   <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(userInput) }} />  "
+
+2. Validate and Sanitize Input in Express (Backend)
+
+"   npm install express-validator sanitize-html
+    const { body, validationResult } = require('express-validator');
+    const sanitizeHtml = require('sanitize-html');
+
+    app.post('/comment', 
+      body('content').trim().escape(),
+      (req, res) => {
+     const errors = validationResult(req);
+     if (!errors.isEmpty()) {
+       return res.status(400).json({ errors: errors.array() });
+     }
+
+     let cleanContent = sanitizeHtml(req.body.content);
+
+    // Save cleanContent to MongoDB
+     res.send('Comment saved safely!');
+     }
+  );  "
+
+3. Use HTTP Headers (Helmet in Express)
+
+ "  npm install helmet
+    const helmet = require('helmet');
+    app.use(helmet());   "
+
+ 
+
+
