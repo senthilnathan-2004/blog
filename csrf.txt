@@ -1,0 +1,65 @@
+Step 1: Install Required Packages:
+"   npm install csurf cookie-parser express   "
+
+Step 2: Setup CSRF Middleware in Express Backend :
+"  const express = require('express');
+const cookieParser = require('cookie-parser');
+const csrf = require('csurf');
+const cors = require('cors');
+const app = express();
+// Enable CORS (Allow frontend requests)
+app.use(cors({
+    origin: 'http://localhost:3000',  // Frontend URL
+    credentials: true
+}));
+app.use(cookieParser());
+app.use(express.json());
+// Setup CSRF protection using cookies
+const csrfProtection = csrf({ cookie: true });
+// Route to get CSRF token
+app.get('/api/csrf-token', csrfProtection, (req, res) => {
+    res.json({ csrfToken: req.csrfToken() });
+});
+// Example protected POST route
+app.post('/api/submit-form', csrfProtection, (req, res) => {
+    const { data } = req.body;
+    res.json({ message: `Form data received: ${data}` });
+});
+app.listen(5000, () => {
+    console.log('Server is running on port 5000');
+});   "
+
+Step 3: React Frontend – Fetch and Use CSRF Token :
+
+"  import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+function App() {
+    const [csrfToken, setCsrfToken] = useState('');
+    // Fetch CSRF token when component mounts
+    useEffect(() => {
+        axios.get('http://localhost:5000/api/csrf-token', { withCredentials: true })
+            .then(response => setCsrfToken(response.data.csrfToken))
+            .catch(error => console.error('Failed to get CSRF token', error));
+    }, []);
+    const handleSubmit = () => {
+        axios.post('http://localhost:5000/api/submit-form', 
+            { data: 'Hello World!' },
+            {
+                headers: {
+                    'X-CSRF-Token': csrfToken
+                },
+                withCredentials: true
+            })
+            .then(response => alert(response.data.message))
+            .catch(error => alert('CSRF Validation Failed!'));
+    };
+    return (
+        <div>
+            <h1>CSRF Protection Example</h1>
+            <button onClick={handleSubmit}>Submit Secure Request</button>
+        </div>
+    );
+}
+export default App;   "
+  
