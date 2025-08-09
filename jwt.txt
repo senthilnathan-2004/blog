@@ -1,0 +1,19 @@
+const jwt = require('jsonwebtoken');
+const fs = require('fs');
+
+const privateKey = fs.readFileSync('./private.pem');
+const publicKey  = fs.readFileSync('./public.pem');
+
+// Sign access token (10 min expiry)
+const token = jwt.sign({ sub: 'user123' }, privateKey, { 
+  algorithm: 'RS256', 
+  expiresIn: '10m' 
+});
+
+// Verify token
+try {
+  const decoded = jwt.verify(token, publicKey);
+  console.log('Valid token for user:', decoded.sub);
+} catch (err) {
+  console.log('Invalid or expired token');
+}
